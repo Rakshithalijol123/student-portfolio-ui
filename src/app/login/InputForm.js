@@ -1,15 +1,45 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { FaRegEnvelope } from "react-icons/fa";
 import { MdLockOutline } from "react-icons/md";
 import { AiOutlineUser } from "react-icons/ai";
+import { fetchJwt } from "../JWT";
+import { baseurl } from "../configuration";
+import bcrypt from "bcryptjs";
+import { data } from "autoprefixer";
 
 const InputForm = () => {
   const router = useRouter();
-  const submitData = () => {
-    router.push("/landingPage");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const submitData = async () => {
+    try {
+      const url = baseurl + "/credentials/login";
+      const token = await fetchJwt();
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+      setUsername("");
+      setPassword("");
+      const data = await response.json();
+      console.log(data);
+      console.log(data.state);
+      if (data.state) {
+        router.push("/");
+      }
+    } catch (e) {
+      console.log("error =", e);
+    }
   };
 
   const goToRegister = () => {
@@ -76,17 +106,9 @@ const InputForm = () => {
                   className="bg-gray-100 outline-none text-sm flex-1"
                   type="text"
                   name="name"
+                  onChange={(e) => setUsername(e.target.value)}
                   placeholder="Username"
-                  required
-                />
-              </div>
-              <div className="bg-gray-100 w-80 p-2 flex items-center mb-3 rounded-lg">
-                <FaRegEnvelope className="text-gray-400 mr-2" />
-                <input
-                  className="bg-gray-100 outline-none text-sm flex-1"
-                  type="email"
-                  name="email"
-                  placeholder="Email"
+                  value={username}
                   required
                 />
               </div>
@@ -96,6 +118,8 @@ const InputForm = () => {
                   className="bg-gray-100 outline-none text-sm flex-1"
                   type="password"
                   name="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
                   placeholder="Password"
                   required
                 />

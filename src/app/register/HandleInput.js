@@ -6,8 +6,9 @@ import { FaRegEnvelope } from "react-icons/fa";
 import { MdLockOutline } from "react-icons/md";
 import { AiOutlineUser } from "react-icons/ai";
 import bcrypt from "bcryptjs";
+import { fetchJwt } from "../JWT";
 
-import { API_BASE_URL } from "../configuration";
+import { baseurl } from "../configuration";
 
 const HandleInput = () => {
   const [username, setUsername] = useState("");
@@ -20,11 +21,14 @@ const HandleInput = () => {
   const goToLogin = async () => {
     console.log(username, email, password, confirmPassword);
 
-    const url = API_BASE_URL + "/user/create";
+    const url = baseurl + "/credentials/create";
     try {
+      const token = await fetchJwt();
+      console.log(token);
       const response = await fetch(url, {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -88,7 +92,6 @@ const HandleInput = () => {
                   className="bg-gray-100 outline-none text-sm flex-1"
                   type="password"
                   name="password"
-                  minlength="8"
                   placeholder="Password"
                   required
                 />
